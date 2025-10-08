@@ -69,7 +69,7 @@ SOURCES+=$(wildcard ../shared/source/COMPONENT_CM33/*.c)
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
-INCLUDES+=
+INCLUDES+=../shared/include
 
 # Custom configuration of mbedtls library.
 MBEDTLSFLAGS = MBEDTLS_USER_CONFIG_FILE='"configs/mbedtls_user_config.h"'
@@ -91,6 +91,9 @@ DEFINES+=ENABLE_HTTP_CLIENT_LOGS MQTT_DO_NOT_USE_CUSTOM_CONFIG
 DEFINES+=HTTP_DO_NOT_USE_CUSTOM_CONFIG
 # for sntp
 DEFINES+=SNTP_SERVER_DNS
+
+
+SEARCH+=../shared/retarget_io/
 
 # Select softfp or hardfp floating point. Default is softfp.
 VFP_SELECT+=
