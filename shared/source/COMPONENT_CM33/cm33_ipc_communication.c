@@ -200,7 +200,7 @@ bool cm33_ipc_safe_get_and_clear_cached_detection(ipc_payload_t* target)
         taskEXIT_CRITICAL();
         return true;
     } else { 
-        // else use the last payload - it will not have a detection
+        // else use the last payload - it will not have an event
         memcpy(target, &ipc_recv_msg.payload, sizeof(ipc_payload_t));
         taskEXIT_CRITICAL();
         return false;

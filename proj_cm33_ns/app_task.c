@@ -420,16 +420,13 @@ static void on_command(IotclC2dEventData data) {
     }
 }
 
-static cy_rslt_t publish_telemetry(void) {
-    ipc_payload_t payload;
-    // useful fro debugging - making sure we have te latest data:
-    // printf("Has IPC Data: %s\n", cm33_ipc_has_received_message() ? "true" : "false");
-    cm33_ipc_safe_get_and_clear_cached_detection(&payload);
+static cy_rslt_t publish_telemetry(ipc_payload_t* payload) {
     IotclMessageHandle msg = iotcl_telemetry_create();
     iotcl_telemetry_set_string(msg, "version", APP_VERSION);
     iotcl_telemetry_set_number(msg, "random", rand() % 100); // test some random numbers
-    iotcl_telemetry_set_string(msg, "event", payload.event);
-	iotcl_telemetry_set_bool(msg, "microphone_active", payload.is_mic_active);
+    iotcl_telemetry_set_string(msg, "event", payload->event);
+    iotcl_telemetry_set_bool(msg, "has_event", payload->has_event);
+	iotcl_telemetry_set_bool(msg, "microphone_active", payload->is_mic_active);
 	
     iotcl_mqtt_send_telemetry(msg, false);
     iotcl_telemetry_destroy(msg);
@@ -531,13 +528,23 @@ void app_task(void *pvParameters) {
             goto exit_cleanup;
         }
         
+        ipc_payload_t payload;
+        cm33_ipc_safe_get_and_clear_cached_detection(&payload);
+        publish_telemetry(&payload); // publish the inital message
+
         int max_messages = is_demo_mode ? 6000 : 300;
         for (int j = 0; iotconnect_sdk_is_connected() && j < max_messages; j++) {
-            cy_rslt_t result = publish_telemetry();
-            if (result != CY_RSLT_SUCCESS) {
-                break;
+            for (int tries = 0; tries < 100; tries++) { // try 100 times * 100 ms = wait up to 10 seconds
+                iotconnect_sdk_poll_inbound_mq(100); 
+                // printf("Has IPC Data: %s\n", cm33_ipc_has_received_message() ? "true" : "false");
+                bool has_payload = cm33_ipc_safe_get_and_clear_cached_detection(&payload);
+                if (!has_payload || !payload.has_event) {
+                    continue; // loop tries to do another poll for 100ms and try again
+                } else {
+                    break; // will break the try loop and publish ASAP
+                }
             }
-            iotconnect_sdk_poll_inbound_mq(reporting_interval);
+            publish_telemetry(&payload); // publish the new message or whatever is available after a set number of tries
         }
         iotconnect_sdk_disconnect();
     }

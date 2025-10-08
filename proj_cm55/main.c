@@ -451,7 +451,7 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
             printf("\n\r");
         }
     }
-
+    cm55_ipc_send_to_cm33();
     /* Update the Green LED state */
     if (breathing_counter == 0)
     {
