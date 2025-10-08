@@ -51,7 +51,7 @@
 #define IOTCONNECT_ENV  "poc"
 
 // prefix for the auto-generated name based on chip HWUID
-#define IOTCONNECT_DUID_PREFIX "e84-rm-"
+#define IOTCONNECT_DUID_PREFIX "e84-va-"
 
 /*
  PEM format certificate and private key
