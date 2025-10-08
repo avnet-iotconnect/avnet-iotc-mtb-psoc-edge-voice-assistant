@@ -84,7 +84,7 @@ static void cm33_msg_callback(uint32_t * msg_data)
     if (msg_data != NULL) {
         /* Copy the message received into our own copy IPC structure */
         memcpy(&ipc_recv_msg, (void *) msg_data, sizeof(ipc_recv_msg));
-        if (ipc_recv_msg.payload.label_id != 0) {
+        if (ipc_recv_msg.payload.has_event) {
             memcpy(&ipc_last_detection_payload, &ipc_recv_msg.payload, sizeof(ipc_payload_t));
             ipc_has_saved_detection = true;
         }

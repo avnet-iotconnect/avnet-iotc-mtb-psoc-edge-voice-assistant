@@ -49,6 +49,8 @@
 /*******************************************************************************
 * Header Files
 *******************************************************************************/
+#include <stdbool.h>
+#include <stdint.h>
 #include "cybsp.h"
 #include "cy_pdl.h"
 #include "cy_ipc_pipe.h"
@@ -86,11 +88,14 @@
 /*******************************************************************************
 * Enumeration
 *******************************************************************************/
+#define IPC_CMD_WAKE_WORD_STR "WAKE"
+#define IPC_CMD_TIMEOUT_STR "TIMEOUT"
 
 /* The actual payload being sent via IPC. This will vary b etween applications */
 typedef struct {
-    uint32_t    label_id;
-    char        label[256];
+    bool        is_mic_active;
+    bool        has_event;
+    char        event[256];
 } ipc_payload_t;
 
 /* IPC Message structure */

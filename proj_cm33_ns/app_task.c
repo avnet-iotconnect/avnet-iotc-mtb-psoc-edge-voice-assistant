@@ -428,9 +428,8 @@ static cy_rslt_t publish_telemetry(void) {
     IotclMessageHandle msg = iotcl_telemetry_create();
     iotcl_telemetry_set_string(msg, "version", APP_VERSION);
     iotcl_telemetry_set_number(msg, "random", rand() % 100); // test some random numbers
-    iotcl_telemetry_set_number(msg, "class_id", payload.label_id);
-    iotcl_telemetry_set_string(msg, "class", payload.label);
-	iotcl_telemetry_set_bool(msg, "event_detected", payload.label_id > 0);
+    iotcl_telemetry_set_string(msg, "event", payload.event);
+	iotcl_telemetry_set_bool(msg, "microphone_active", payload.is_mic_active);
 	
     iotcl_mqtt_send_telemetry(msg, false);
     iotcl_telemetry_destroy(msg);
@@ -521,15 +520,14 @@ void app_task(void *pvParameters) {
 
     cy_rslt_t ret = iotconnect_sdk_init(&config);
     if (CY_RSLT_SUCCESS != ret) {
-        printf("Failed to initialize the IoTConnect SDK. Error code: %lu\n", ret);
+        printf("Failed to initialize the IoTConnect SDK. Error code: %u\n", (unsigned int) ret);
         goto exit_cleanup;
     }
-
 
     for (int i = 0; i < 10; i++) {
         ret = iotconnect_sdk_connect();
         if (CY_RSLT_SUCCESS != ret) {
-            printf("Failed to initialize the IoTConnect SDK. Error code: %lu\n", ret);
+            printf("Failed to initialize the IoTConnect SDK. Error code: %u\n", (unsigned int) ret);
             goto exit_cleanup;
         }
         

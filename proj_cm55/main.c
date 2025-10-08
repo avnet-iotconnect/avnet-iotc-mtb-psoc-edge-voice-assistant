@@ -38,6 +38,8 @@
 * so agrees to indemnify Cypress against all liability.
 *******************************************************************************/
 
+#include <string.h>
+
 #include "cybsp.h"
 
 /* RTOS includes */
@@ -49,6 +51,8 @@
 #include "pdm_mic.h"
 #include "led_pwm.h"
 #include "retarget_io_init.h"
+
+#include "ipc_communication.h"
 
 /* Application related includes */
 #include "voice_assistant.h"
@@ -69,20 +73,20 @@
 #define VOICE_ASSISTANT_TASK_STACK_SIZE         (10 * 1024)
 #define VOICE_ASSISTANT_TASK_PRIORITY           (CY_RTOS_PRIORITY_NORMAL)
 
-/* Enabling or disabling a MCWDT requires a wait time of upto 2 CLK_LF cycles  
- * to come into effect. This wait time value will depend on the actual CLK_LF  
+/* Enabling or disabling a MCWDT requires a wait time of upto 2 CLK_LF cycles
+ * to come into effect. This wait time value will depend on the actual CLK_LF
  * frequency set by the BSP.
  */
 #define LPTIMER_1_WAIT_TIME_USEC                (62U)
 
-/* Define the LPTimer interrupt priority number. '1' implies highest priority. 
+/* Define the LPTimer interrupt priority number. '1' implies highest priority.
  */
 #define APP_LPTIMER_INTERRUPT_PRIORITY          (1U)
 
-/* This is the maximum size of the command string that can be detected by the 
- * voice assistant. 
+/* This is the maximum size of the command string that can be detected by the
+ * voice assistant.
  */
-#define COMMAND_STRING_SIZE                     (250U) 
+#define COMMAND_STRING_SIZE                     (250U)
 
 /* Debounce counter for button presses (multiply by 10 ms) */
 #define BUTTON_DEBOUNCE_COUNT                   (10U)
@@ -91,18 +95,18 @@
 #define NUM_AUDIO_CHANNELS                      (1U)
 
 /* How often to print the MCPS (multiply by 10 ms) */
-#define PRINT_MCPS_COUNT                        (100u)    
+#define PRINT_MCPS_COUNT                        (100u)
 
 /* Uncomment to print MCPS (Voice-Assistant only) */
 //#define SHOW_MCPS
 
-/* Choose one of the following options to run the voice-assistant: 
+/* Choose one of the following options to run the voice-assistant:
  * VA_MODE_WW_SINGLE_CMD : For every wake word, a single command is detected
  * VA_MODE_WW_MULTI_CMD  : For every wake word, multiple commands can be detected
  * VA_MODE_WW_ONLY       : Only wake word detection is performed
  * VA_MODE_CMD_ONLY      : Only command detection is performed
  */
-#define RUNNING_MODE            (VA_MODE_WW_SINGLE_CMD) 
+#define RUNNING_MODE            (VA_MODE_WW_SINGLE_CMD)
 
 /*****************************************************************************
  * Variables
@@ -145,10 +149,10 @@ static void lptimer_interrupt_handler(void)
 ********************************************************************************
 * Summary:
 * 1. This function first configures and initializes an interrupt for LPTimer.
-* 2. Then it initializes the LPTimer HAL object to be used in the RTOS 
-*    tickless idle mode implementation to allow the device enter deep sleep 
+* 2. Then it initializes the LPTimer HAL object to be used in the RTOS
+*    tickless idle mode implementation to allow the device enter deep sleep
 *    when idle task runs. LPTIMER_1 instance is configured for CM55 CPU.
-* 3. It then passes the LPTimer object to abstraction RTOS library that 
+* 3. It then passes the LPTimer object to abstraction RTOS library that
 *    implements tickless idle mode
 *
 * Parameters:
@@ -168,10 +172,10 @@ static void setup_tickless_idle_timer(void)
     };
 
     /* Initialize the LPTimer interrupt and specify the interrupt handler. */
-    cy_en_sysint_status_t interrupt_init_status = 
-                                    Cy_SysInt_Init(&lptimer_intr_cfg, 
+    cy_en_sysint_status_t interrupt_init_status =
+                                    Cy_SysInt_Init(&lptimer_intr_cfg,
                                                     lptimer_interrupt_handler);
-    
+
     /* LPTimer interrupt initialization failed. Stop program execution. */
     if(CY_SYSINT_SUCCESS != interrupt_init_status)
     {
@@ -182,8 +186,8 @@ static void setup_tickless_idle_timer(void)
     NVIC_EnableIRQ(lptimer_intr_cfg.intrSrc);
 
     /* Initialize the MCWDT block */
-    cy_en_mcwdt_status_t mcwdt_init_status = 
-                                    Cy_MCWDT_Init(CYBSP_CM55_LPTIMER_1_HW, 
+    cy_en_mcwdt_status_t mcwdt_init_status =
+                                    Cy_MCWDT_Init(CYBSP_CM55_LPTIMER_1_HW,
                                                 &CYBSP_CM55_LPTIMER_1_config);
 
     /* MCWDT initialization failed. Stop program execution. */
@@ -191,25 +195,25 @@ static void setup_tickless_idle_timer(void)
     {
         handle_error();
     }
-  
+
     /* Enable MCWDT instance */
     Cy_MCWDT_Enable(CYBSP_CM55_LPTIMER_1_HW,
-                    CY_MCWDT_CTR_Msk, 
+                    CY_MCWDT_CTR_Msk,
                     LPTIMER_1_WAIT_TIME_USEC);
 
     /* Setup LPTimer using the HAL object and desired configuration as defined
      * in the device configurator. */
-    cy_rslt_t result = mtb_hal_lptimer_setup(&lptimer_obj, 
+    cy_rslt_t result = mtb_hal_lptimer_setup(&lptimer_obj,
                                             &CYBSP_CM55_LPTIMER_1_hal_config);
-    
+
     /* LPTimer setup failed. Stop program execution. */
     if(CY_RSLT_SUCCESS != result)
     {
         handle_error();
     }
 
-    /* Pass the LPTimer object to abstraction RTOS library that implements 
-     * tickless idle mode 
+    /* Pass the LPTimer object to abstraction RTOS library that implements
+     * tickless idle mode
      */
     cyabs_rtos_set_lptimer(&lptimer_obj);
 }
@@ -220,7 +224,7 @@ static void setup_tickless_idle_timer(void)
  *******************************************************************************
  * Summary:
  * Update the LED state and brightness based on the intent detected.
- *  
+ *
  * Parameters:
  *  intent: detected intent index
  *  brightness: LED brightness level (0-100)
@@ -264,9 +268,9 @@ static void led_demo(int intent, uint8_t brightness)
  *******************************************************************************
  * Summary:
  * Check if the user button is pressed.
- *  
+ *
  * Parameters:
- *  
+ *
  * Return:
  *  Returns true if the button is pressed, false otherwise
  *
@@ -299,9 +303,9 @@ static bool check_button_pressed(void)
  *******************************************************************************
  * Summary:
  * Prints the number of CPU cycles in Mega cycles per second (MCPS)
- *  
+ *
  * Parameters:
- *  
+ *
  * Return:
  *  void
  *
@@ -310,7 +314,7 @@ static void print_mcps(void)
 {
     cpu_cycle_sum += profiler_get_cycles();
     show_count++;
-    if(show_count >= PRINT_MCPS_COUNT) 
+    if(show_count >= PRINT_MCPS_COUNT)
     {
         printf("Profiler: %u MCPS\r\n", cpu_cycle_sum/1000000);
         show_count = 0;
@@ -323,10 +327,10 @@ static void print_mcps(void)
  * Function Name: print_voice_assistant_status
  *******************************************************************************
  * Summary:
- * Prints an error message if wake-word detection result is not successful. 
+ * Prints an error message if wake-word detection result is not successful.
  * Or a detection message if wake-word is detected.
  * Also update the Green LED to indicate the voice assistant state.
- *  
+ *
  * Parameters:
  *  result: result of the voice-assistant operation
  *  event: state of the voice-assistant operation
@@ -340,14 +344,24 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
 {
     char command_text[COMMAND_STRING_SIZE] = {0};
 
+    ipc_payload_t* payload = cm55_ipc_get_payload_ptr();
+    payload->has_event = false;
+    payload->event[0] = '\0'; // make sure there's no string in the event buffer
+
     if (result == VA_RSLT_LICENSE_ERROR)
     {
         printf("ERROR! Voice Assistant license expired!\r\n");
         handle_error();
+        strcpy(payload->event, "license expired");
+        payload->has_event = true;
+        payload->is_mic_active = false;
     }
     else if ( result != VA_RSLT_SUCCESS )
     {
         printf("Error! voice_assistant_process!! Error code=%d\r\n", result);
+        strcpy(payload->event, "ERROR");
+        payload->has_event = true;
+        payload->is_mic_active = false;
     }
     else
     {
@@ -358,6 +372,9 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
                 breathing_counter = LED_PWM_MIN_BRIGHTNESS;
             }
             printf("Wake-word detected!\r\n");
+            strcpy(payload->event, IPC_CMD_WAKE_WORD_STR);
+            payload->has_event = true;
+            payload->is_mic_active = true;
         }
         else if ( event == VA_EVENT_CMD_TIMEOUT )
         {
@@ -365,6 +382,9 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
             {
                 breathing_counter = 0;
                 printf("Command Timeout!\r\n");
+                strcpy(payload->event, IPC_CMD_TIMEOUT_STR);
+                payload->has_event = true;
+                payload->is_mic_active = false;
             }
         }
         else if ( event == VA_EVENT_CMD_SILENCE_TIMEOUT )
@@ -373,6 +393,9 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
             {
                 breathing_counter = 0;
                 printf("Pre Silence Timeout!\r\n");
+                strcpy(payload->event, IPC_CMD_TIMEOUT_STR);
+                payload->has_event = true;
+                payload->is_mic_active = false;
             }
         }
         else if ( event == VA_EVENT_CMD_DETECTED )
@@ -385,6 +408,9 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
             if (CY_RSLT_SUCCESS == voice_assistant_get_command(command_text))
             {
                 printf("%s\r\n\r\n", command_text);
+                strcpy(payload->event, command_text);
+                payload->has_event = true;
+                payload->is_mic_active = false;
             }
 
             if (va_data == NULL)
@@ -452,7 +478,7 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
  *******************************************************************************
  * Summary:
  * Run the voice assistant process and print any information in the terminal.
- *  
+ *
  * Parameters:
  *  audio_frame: pointer to the audio data frame
  *
@@ -468,7 +494,7 @@ static void run_voice_assistant_process(int16_t *audio_frame)
 
 #ifdef SHOW_MCPS
     profiler_start();
-#endif    
+#endif
     /* Process the audio data */
     va_result = voice_assistant_process(audio_frame, &va_event, &va_data);
 #ifdef SHOW_MCPS
@@ -507,15 +533,15 @@ void voice_assistant_task(void * arg)
     va_rslt_t va_result;
 #ifdef USE_AUDIO_ENHANCEMENT
     ae_rslt_t ae_result;
-#endif /* USE_AUDIO_ENHANCEMENT */    
-    
+#endif /* USE_AUDIO_ENHANCEMENT */
+
     /* Initialize the PDM microphone */
     pdm_mic_init();
 
     // Initialize the profiler to print MCPS
 #ifdef SHOW_MCPS
     profiler_init();
-#endif /* SHOW_MCPS */   
+#endif /* SHOW_MCPS */
 
     /* Initialize the LED PWM driver */
     led_pwm_init();
@@ -558,16 +584,16 @@ void voice_assistant_task(void * arg)
     printf("9. Change the light state \r\n\r\n");
 #else
     /* Print the instructions */
-    if ((RUNNING_MODE == VA_MODE_WW_SINGLE_CMD) || (RUNNING_MODE == VA_MODE_WW_MULTI_CMD)) 
+    if ((RUNNING_MODE == VA_MODE_WW_SINGLE_CMD) || (RUNNING_MODE == VA_MODE_WW_MULTI_CMD))
     {
-        printf("\n\rSay the wake-word \"%s\" followed by a command.\n\r\n\r", 
+        printf("\n\rSay the wake-word \"%s\" followed by a command.\n\r\n\r",
                MTB_WWD_NLU_CONFIG_WAKE_WORD_STR(PROJECT_PREFIX)[0]);
-    } 
+    }
     else if (RUNNING_MODE == VA_MODE_WW_ONLY)
     {
-        printf("\n\rSay the wake-word \"%s\".\n\r\n\r", 
+        printf("\n\rSay the wake-word \"%s\".\n\r\n\r",
                MTB_WWD_NLU_CONFIG_WAKE_WORD_STR(PROJECT_PREFIX)[0]);
-    } 
+    }
     else if (RUNNING_MODE == VA_MODE_CMD_ONLY)
     {
         printf("\n\rSay a command.\n\r");
@@ -596,7 +622,7 @@ void voice_assistant_task(void * arg)
             printf("Push to Talk Button detected! Say a command!\r\n\r\n");
             voice_assistant_change_state(VA_RUN_CMD);
         }
-        
+
 #ifdef USE_AUDIO_ENHANCEMENT
         /* Apply the audio enhancement if AFE is enabled */
         ae_result = audio_enhancement_feed_input(audio_frame, NULL);
@@ -605,24 +631,24 @@ void voice_assistant_task(void * arg)
             printf("ERROR! Audio Enhancement license expired!\r\n");
             handle_error();
         }
-#else   
+#else
 
-        /* If Audio Enhancement is not used, run voice-assistant 
+        /* If Audio Enhancement is not used, run voice-assistant
          * directly with the microphone data */
         run_voice_assistant_process(audio_frame);
 
-#endif  /* USE_AUDIO_ENHANCEMENT */       
+#endif  /* USE_AUDIO_ENHANCEMENT */
 
-    }  
+    }
 }
 
 /*****************************************************************************
  * Function Name: main
  ******************************************************************************
  * Summary:
- * This is the main function for CM55 non-secure application. 
+ * This is the main function for CM55 non-secure application.
  *    1. It initializes the device and board peripherals.
- *    3. It creates the FreeRTOS application task 
+ *    3. It creates the FreeRTOS application task
  *    4. It starts the RTOS task scheduler.
  *
  * Parameters:
@@ -658,6 +684,8 @@ int main(void)
            "******************************************** \r\n\n");
 
     setup_tickless_idle_timer();
+
+    cm55_ipc_communication_setup();
 
     /* If AFE is used, intialize the audio enhancement */
 #ifdef USE_AUDIO_ENHANCEMENT
