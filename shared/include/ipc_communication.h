@@ -96,6 +96,10 @@ typedef struct {
     bool        is_mic_active;
     bool        has_event;
     char        event[256];
+    char        intent_name[50];
+    /* Currently no support for units and only one parameter is supported */
+    char        intent_param1_str_var[50];
+    int32_t     intent_param1_int_var;
 } ipc_payload_t;
 
 /* IPC Message structure */

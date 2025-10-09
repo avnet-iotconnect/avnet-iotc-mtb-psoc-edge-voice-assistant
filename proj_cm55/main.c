@@ -347,6 +347,11 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
     ipc_payload_t* payload = cm55_ipc_get_payload_ptr();
     payload->has_event = false;
     payload->event[0] = '\0'; // make sure there's no string in the event buffer
+    
+    // we will initialize this array for whatever intent gets discovered later
+    payload->intent_name[0] = '\0';
+    payload->intent_param1_str_var[0] = '\0';
+    payload->intent_param1_int_var = -1;
 
     if (result == VA_RSLT_LICENSE_ERROR)
     {
@@ -419,6 +424,8 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
             }
 
             printf("Intent name: %s\r\n", MTB_NLU_INTENT_NAME_LIST(PROJECT_PREFIX)[va_data->intent_index] );
+            // we will initialize this array for whatever intent gets discovered later
+            strcpy(payload->intent_name, MTB_NLU_INTENT_NAME_LIST(PROJECT_PREFIX)[va_data->intent_index]);
 
             if (va_data->num_var != 0)
             {
@@ -428,10 +435,12 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
                     if (va_data->variable[i].unit_idx < 0)
                     {
                         printf("%s ", MTB_NLU_VARIABLE_PHRASE_LIST(PROJECT_PREFIX)[va_data->variable[i].value]);
+                        strcpy(payload->intent_param1_str_var, MTB_NLU_VARIABLE_PHRASE_LIST(PROJECT_PREFIX)[va_data->variable[i].value]);
                     }
                     else
                     {
                         printf("%d ", va_data->variable[i].value);
+                        payload->intent_param1_int_var = va_data->variable[i].value;
                     }
                 }
                 printf("\n\rVariable units : ");

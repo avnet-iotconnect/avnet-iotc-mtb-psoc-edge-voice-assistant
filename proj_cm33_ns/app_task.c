@@ -49,6 +49,7 @@
  */
 
 #include "cybsp.h"
+#include <string.h>
 
 /* FreeRTOS header files */
 #include "FreeRTOS.h"
@@ -124,8 +125,18 @@ static mtb_hal_sdio_t sdio_instance;
 static cy_stc_sd_host_context_t sdhc_host_context;
 static cy_wcm_config_t wcm_config;
 
-
 #define APP_VERSION		"1.0.0"
+#define ROOM_IDX_KITCHEN 0
+#define ROOM_IDX_BEDROOM 1
+#define ROOM_IDX_LIVING_ROOM 2
+#define ROOMS_ARRAY_LENGTH (ROOM_IDX_LIVING_ROOM + 1)
+static int light_levels[ROOMS_ARRAY_LENGTH] = {0, 0, 10};  // start with living room lit
+
+/* Intent Values */
+#define ROOM_STR_KITCHEN "kitchen"
+#define ROOM_STR_BEDROOM "bedroom"
+#define ROOM_STR_LIVING_ROOM "living room"
+
 static bool is_demo_mode = false;
 
 static int reporting_interval = 2000;
@@ -422,8 +433,56 @@ static void on_command(IotclC2dEventData data) {
 
 static cy_rslt_t publish_telemetry(ipc_payload_t* payload) {
     IotclMessageHandle msg = iotcl_telemetry_create();
+    if (strlen(payload->intent_name) > 0) {
+        if (0 == strcmp(payload->intent_name, "TurnOnAllLights")) {
+            light_levels[ROOM_IDX_KITCHEN] = 10;
+            light_levels[ROOM_IDX_BEDROOM] = 10;
+            light_levels[ROOM_IDX_LIVING_ROOM]= 10;
+        } else if (0 == strcmp(payload->intent_name, "TurnOffLights")) {
+            if (0 == strcmp(payload->intent_param1_str_var, ROOM_STR_KITCHEN)) {
+                light_levels[ROOM_IDX_KITCHEN] = 0;
+            } else if (0 == strcmp(payload->intent_param1_str_var, ROOM_STR_BEDROOM)) {
+                light_levels[ROOM_IDX_BEDROOM] = 0;
+            } else if (0 == strcmp(payload->intent_param1_str_var, ROOM_STR_LIVING_ROOM)) {
+                light_levels[ROOM_IDX_LIVING_ROOM] = 0;
+            } else {
+                printf("WARN: Unknown room parameter \"%s\" received\n", payload->intent_param1_str_var);
+            }
+        } else if (0 == strcmp(payload->intent_name, "TurnOnLights")) {
+            if (0 == strcmp(payload->intent_param1_str_var, ROOM_STR_KITCHEN)) {
+                light_levels[ROOM_IDX_KITCHEN] = 10;
+            } else if (0 == strcmp(payload->intent_param1_str_var, ROOM_STR_BEDROOM)) {
+                light_levels[ROOM_IDX_BEDROOM] = 10;
+            } else if (0 == strcmp(payload->intent_param1_str_var, ROOM_STR_LIVING_ROOM)) {
+                light_levels[ROOM_IDX_LIVING_ROOM] = 10;
+            } else {
+                printf("WARN: Unknown room parameter \"%s\" received\n", payload->intent_param1_str_var);
+            }            
+        } else if (0 == strcmp(payload->intent_name, "ChangeLights")) {
+            int light_value = (int) payload->intent_param1_int_var;
+            if (light_value >= 0 && light_value <= 10) {
+                if (light_levels[ROOM_IDX_KITCHEN] > 0) {
+                    light_levels[ROOM_IDX_KITCHEN] = light_value;
+                }
+                if (light_levels[ROOM_IDX_BEDROOM] > 0) {
+                    light_levels[ROOM_IDX_BEDROOM] = light_value;
+                }
+                if (light_levels[ROOM_IDX_LIVING_ROOM] > 0) {
+                    light_levels[ROOM_IDX_LIVING_ROOM] = light_value;            
+                }
+
+            } else {
+                printf("WARN: Invalid light level \"%d\" received\n", light_value);
+            }
+        } else {
+            printf("WARN: Unknown intent \"%s\" received\n", payload->intent_name);
+        }
+
+    }
     iotcl_telemetry_set_string(msg, "version", APP_VERSION);
-    iotcl_telemetry_set_number(msg, "random", rand() % 100); // test some random numbers
+    iotcl_telemetry_set_number(msg, "ll_kitchen", light_levels[ROOM_IDX_KITCHEN]);
+    iotcl_telemetry_set_number(msg, "ll_bedroom", light_levels[ROOM_IDX_BEDROOM]);
+    iotcl_telemetry_set_number(msg, "ll_living_room", light_levels[ROOM_IDX_LIVING_ROOM]);
     iotcl_telemetry_set_string(msg, "event", payload->event);
     iotcl_telemetry_set_bool(msg, "has_event", payload->has_event);
 	iotcl_telemetry_set_bool(msg, "microphone_active", payload->is_mic_active);
@@ -535,7 +594,7 @@ void app_task(void *pvParameters) {
         int max_messages = is_demo_mode ? 6000 : 300;
         for (int j = 0; iotconnect_sdk_is_connected() && j < max_messages; j++) {
             for (int tries = 0; tries < 100; tries++) { // try 100 times * 100 ms = wait up to 10 seconds
-                iotconnect_sdk_poll_inbound_mq(100); 
+                iotconnect_sdk_poll_inbound_mq(100);
                 // printf("Has IPC Data: %s\n", cm33_ipc_has_received_message() ? "true" : "false");
                 bool has_payload = cm33_ipc_safe_get_and_clear_cached_detection(&payload);
                 if (!has_payload || !payload.has_event) {
