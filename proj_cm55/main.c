@@ -565,7 +565,9 @@ void voice_assistant_task(void * arg)
     }
     else
     {
+#ifdef CM55_ENABLE_STARTUP_PRINTS        
         printf("Voice Assistant initialized!\r\n\r\n");
+#endif
     }
 
     /* Set the initial breathing counter value */
@@ -687,9 +689,9 @@ int main(void)
     /* Initialize retarget-io middleware */
     init_retarget_io();
 
+#ifdef CM55_ENABLE_STARTUP_PRINTS
     printf("\x1b[2J\x1b[;H");
 
-#ifdef CM55_ENABLE_STARTUP_PRINTS
     printf("******************************************** \r\n"
            "PSOC Edge MCU: Voice Assistant Demo          \r\n"
            "******************************************** \r\n\n");
@@ -710,7 +712,9 @@ int main(void)
     }
     else
     {
+#ifdef CM55_ENABLE_STARTUP_PRINTS        
         printf("Audio Enhancement initialized!\r\n");
+#endif
     }
 #endif /* USE_AUDIO_ENHANCEMENT */
 
