@@ -577,7 +577,7 @@ void voice_assistant_task(void * arg)
     {
         breathing_counter = 0;
     }
-
+#ifdef CM55_ENABLE_STARTUP_PRINTS
 #ifdef USE_LED_DEMO
     printf("Wake word: Okay Infineon \n\n\r");
     printf("Example: Okay Infineon <switch on the light>\n\n\r");
@@ -619,6 +619,7 @@ void voice_assistant_task(void * arg)
         printf("d. In case of timeout or silence after wake word detection BLUE User LED will be solid again indicating step (a) \r\n");
     }
     printf("\n\r");
+#endif
 
     for (;;)
     {
@@ -688,10 +689,11 @@ int main(void)
 
     printf("\x1b[2J\x1b[;H");
 
+#ifdef CM55_ENABLE_STARTUP_PRINTS
     printf("******************************************** \r\n"
            "PSOC Edge MCU: Voice Assistant Demo          \r\n"
            "******************************************** \r\n\n");
-
+#endif
     setup_tickless_idle_timer();
 
     cm55_ipc_communication_setup();
