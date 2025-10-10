@@ -4,17 +4,17 @@
  */
 
 #include "cybsp.h"
-#include "cy_syslib.h" // for Cy_SysLib_GetUniqueId
 #include <string.h>
 
-/* FreeRTOS header files */
+#include "cy_syslib.h" // for Cy_SysLib_GetUniqueId
+
 #include "FreeRTOS.h"
 
 #include "retarget_io_init.h"
 #include "ipc_communication.h"
 
-#include "wifi_app.h"
 #include "wifi_config.h"
+#include "wifi_app.h"
 
 #include "iotconnect.h"
 
@@ -34,7 +34,6 @@ static int light_levels[ROOMS_ARRAY_LENGTH] = {0, 0, 10};  // start with living 
 #define ROOM_STR_BEDROOM "bedroom"
 #define ROOM_STR_LIVING_ROOM "living room"
 
-static bool is_demo_mode = false;
 static int reporting_interval = 2000;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,7 +99,6 @@ static bool parse_on_off_command(const char* command, const char* name, bool *ar
 
 static void on_command(IotclC2dEventData data) {
     const char * const BOARD_STATUS_LED = "board-user-led";
-    const char * const DEMO_MODE_CMD = "demo-mode";
     const char * const SET_REPORTING_INTERVAL = "set-reporting-interval "; // with a space
 
     bool command_success = false;
@@ -123,8 +121,6 @@ static void on_command(IotclC2dEventData data) {
                     Cy_GPIO_Clr(CYBSP_USER_LED_PORT, CYBSP_USER_LED_PIN);
                 }
             }
-        } else if (parse_on_off_command(command, DEMO_MODE_CMD,  &arg_parsing_success, &is_demo_mode, &message)) {
-            command_success = arg_parsing_success;
         } else if (0 == strncmp(SET_REPORTING_INTERVAL, command, strlen(SET_REPORTING_INTERVAL))) {
         	int value = atoi(&command[strlen(SET_REPORTING_INTERVAL)]);
         	if (0 == value) {
@@ -221,25 +217,27 @@ static cy_rslt_t publish_telemetry(ipc_payload_t* payload) {
 }
 
 void app_task(void *pvParameters) {
-    printf("===============================================================\n");
-    printf("Starting The App Task\n");
-    printf("===============================================================\n\n");
-
-    uint64_t hwuid = Cy_SysLib_GetUniqueId();
-    uint32_t hwuidhi = (uint32_t)(hwuid >> 32);
-    // not using low bytes in the name because they appear to be the same across all boards of the same type
-    // feel free to modify the application to use these bytes
-    // uint32_t hwuidlo = (uint32_t)(hwuid & 0xFFFFFFFF);
+    printf("CM33 /IOTCONNECT App Task Started. Waiting for CM55 IPC to start..\n");
+    // we want to wait for CM33 to start receiving messages to prevent halts and errors below.
+    while (!cm33_ipc_has_received_message()) {
+        taskYIELD(); // wait for CM55
+    }
+    printf("App Task: CM55 IPC is ready. Resuming the application...\n");
 
     char iotc_duid[IOTCL_CONFIG_DUID_MAX_LEN] = IOTCONNECT_DUID;
     if (0 == strlen(iotc_duid)) {
+        uint64_t hwuid = Cy_SysLib_GetUniqueId();
+        uint32_t hwuidhi = (uint32_t)(hwuid >> 32);
+        // not using low bytes in the name because they appear to be the same across all boards of the same type
+        // feel free to modify the application to use these bytes
+        // uint32_t hwuidlo = (uint32_t)(hwuid & 0xFFFFFFFF);
         sprintf(iotc_duid, IOTCONNECT_DUID_PREFIX"%08lx", (unsigned long) hwuidhi);
         printf("Generated device unique ID (DUID) is: %s\n", iotc_duid);
     }
 
     if (strlen(IOTCONNECT_DEVICE_CERT) == 0) {
-		printf("Device certificate is missing.\n");
-        while (1) { taskYIELD(); }
+		printf("ERROR: Device certificate is missing. Please configure the /IOTCONNECT credentials in app_config.h\n");
+        goto exit_cleanup;
 	}
 
     IotConnectClientConfig config;
@@ -289,8 +287,7 @@ void app_task(void *pvParameters) {
         cm33_ipc_safe_get_and_clear_cached_detection(&payload);
         publish_telemetry(&payload); // publish the inital message
 
-        int max_messages = is_demo_mode ? 6000 : 300;
-        for (int j = 0; iotconnect_sdk_is_connected() && j < max_messages; j++) {
+        for (int j = 0; iotconnect_sdk_is_connected() && j < 300; j++) { // send up to "300 messaages * i" to not flood while developing
             for (int tries = 0; tries < 100; tries++) { // try 100 times * 100 ms = wait up to 10 seconds
                 iotconnect_sdk_poll_inbound_mq(100);
                 // printf("Has IPC Data: %s\n", cm33_ipc_has_received_message() ? "true" : "false");

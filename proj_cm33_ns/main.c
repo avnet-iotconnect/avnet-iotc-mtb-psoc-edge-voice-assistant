@@ -217,11 +217,9 @@ int main(void)
     /* \x1b[2J\x1b[;H - ANSI ESC sequence to clear screen. */
     printf("\x1b[2J\x1b[;H");
     printf("===============================================================\n");
-
-    printf("PSOC Edge MCU: /IOTCONNECT Client\n");
-
-    printf("===============================================================\n\n");
-
+    printf("PSOC Edge MCU /IOTCONNECT\n");
+    printf("===============================================================\n");
+    
     /* Enable CM55. CY_CORTEX_M55_APPL_ADDR must be updated if CM55 memory layout is changed. */
     Cy_SysEnableCM55(MXCM55, CY_CM55_APP_BOOT_ADDR, CM55_BOOT_WAIT_TIME_US);
 
@@ -230,8 +228,7 @@ int main(void)
     if( pdPASS != result ) {
 		handle_app_error();
 	}
-             
-            
+
     if( pdPASS == result )
     {
         /* Start the FreeRTOS scheduler. */

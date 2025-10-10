@@ -565,9 +565,7 @@ void voice_assistant_task(void * arg)
     }
     else
     {
-#ifdef CM55_ENABLE_STARTUP_PRINTS        
-        printf("Voice Assistant initialized!\r\n\r\n");
-#endif
+        printf("CM55 Voice Assistant initialized!\r\n");
     }
 
     /* Set the initial breathing counter value */
@@ -688,7 +686,7 @@ int main(void)
 
     /* Initialize retarget-io middleware */
     init_retarget_io();
-
+    printf("CM55 Start\n");
 #ifdef CM55_ENABLE_STARTUP_PRINTS
     printf("\x1b[2J\x1b[;H");
 
@@ -712,9 +710,7 @@ int main(void)
     }
     else
     {
-#ifdef CM55_ENABLE_STARTUP_PRINTS        
-        printf("Audio Enhancement initialized!\r\n");
-#endif
+        printf("CM55 Audio Enhancement initialized!\r\n");
     }
 #endif /* USE_AUDIO_ENHANCEMENT */
 

@@ -276,6 +276,7 @@ static void app_sdio_init(void)
     NVIC_EnableIRQ(CYBSP_WIFI_HOST_WAKE_IRQ);
 }
 
+// This call will not return if it fails
 void wifi_app_connect(void) {
 
     // psoc edge  needs this for WiFi
