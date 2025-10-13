@@ -1,0 +1,64 @@
+{
+    "code": "pedgeva",
+    "name": "pedgeva",
+    "authType": 2,
+    "attributes": [
+        {
+            "name": "version",
+            "type": "STRING",
+            "description": "Version reported by the software",
+            "unit": null
+        },
+		{
+            "name": "ll_kitchen",
+            "type": "INTEGER",
+            "description": "Kitchen lights level (0-10)",
+            "unit": null
+        },
+		{
+            "name": "ll_bedroom",
+            "type": "INTEGER",
+            "description": "Bedroom lights level (0-10)",
+            "unit": null
+        },
+		{
+            "name": "ll_living_room",
+            "type": "INTEGER",
+            "description": "Living room lights level (0-10)",
+            "unit": null
+        },
+		{
+            "name": "event",
+            "type": "STRING",
+            "description": "Detected microphone event - WAKE/TIMEOUT, or an actual voice command",
+            "unit": null
+        },
+		{
+            "name": "has_event",
+            "type": "BOOLEAN",
+            "description": "Detected true when a microphone event or inactivity has been detected",
+            "unit": null
+        }
+    ],
+    "commands": [
+        {
+            "name": "board-user-led",
+            "command": "board-user-led",
+            "requiredParam": true,
+            "requiredAck": true,
+            "isOTACommand": false
+        }
+    ],
+    "messageVersion": "2.1",
+    "msgCode": "GMLP27M",
+    "greenGrass": "0",
+    "wireless": "0",
+    "properties": {
+        "description": null,
+        "dataFrequency": "60",
+        "fileSupport": false
+    },
+    "_meta": {
+        "version": "2.0"
+    }
+}

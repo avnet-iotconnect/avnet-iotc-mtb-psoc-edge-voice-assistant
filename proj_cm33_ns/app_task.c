@@ -22,17 +22,22 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define APP_VERSION		"1.0.0"
-#define ROOM_IDX_KITCHEN 0
-#define ROOM_IDX_BEDROOM 1
-#define ROOM_IDX_LIVING_ROOM 2
-#define ROOMS_ARRAY_LENGTH (ROOM_IDX_LIVING_ROOM + 1)
-static int light_levels[ROOMS_ARRAY_LENGTH] = {0, 0, 10};  // start with living room lit
+// Smart_Lights_Demo -- use the smart lights demo model (default)
+// LED_Demo          -- use the LED demo model
+// Cooktop_Demo      -- use the cooktop demo model
 
-/* Intent Values */
-#define ROOM_STR_KITCHEN "kitchen"
-#define ROOM_STR_BEDROOM "bedroom"
-#define ROOM_STR_LIVING_ROOM "living room"
+
+#define APP_VERSION_BASE "01.01.00"
+
+#if defined(Smart_Lights_Demo)
+#define APP_VERSION ("S-" APP_VERSION_BASE)
+#elif defined(LED_Demo)
+#define APP_VERSION ("L-" APP_VERSION_BASE)
+#elif defined(Cooktop_Demo)
+#define APP_VERSION ("B-" APP_VERSION_BASE)
+#else
+#define APP_VERSION ("?-" APP_VERSION_BASE)
+#endif
 
 static int reporting_interval = 2000;
 
@@ -154,8 +159,19 @@ static void on_command(IotclC2dEventData data) {
     }
 }
 
-static cy_rslt_t publish_telemetry(ipc_payload_t* payload) {
-    IotclMessageHandle msg = iotcl_telemetry_create();
+#if defined(Smart_Lights_Demo)
+static void setup_message_smart_lights(IotclMessageHandle* msg, ipc_payload_t* payload) {
+
+    #define ROOM_IDX_KITCHEN 0
+    #define ROOM_IDX_BEDROOM 1
+    #define ROOM_IDX_LIVING_ROOM 2
+    #define ROOMS_ARRAY_LENGTH (ROOM_IDX_LIVING_ROOM + 1)
+    static int light_levels[ROOMS_ARRAY_LENGTH] = {0, 0, 10};  // start with living room lit
+
+    /* Intent Values */
+    #define ROOM_STR_KITCHEN "kitchen"
+    #define ROOM_STR_BEDROOM "bedroom"
+    #define ROOM_STR_LIVING_ROOM "living room"
 
     if (strlen(payload->intent_name) > 0) {
         if (0 == strcmp(payload->intent_name, "TurnOnAllLights")) {
@@ -203,16 +219,28 @@ static cy_rslt_t publish_telemetry(ipc_payload_t* payload) {
         }
     }
 
+    iotcl_telemetry_set_number(*msg, "ll_kitchen", light_levels[ROOM_IDX_KITCHEN]);
+    iotcl_telemetry_set_number(*msg, "ll_bedroom", light_levels[ROOM_IDX_BEDROOM]);
+    iotcl_telemetry_set_number(*msg, "ll_living_room", light_levels[ROOM_IDX_LIVING_ROOM]);
+}
+#endif
+
+static cy_rslt_t publish_telemetry(ipc_payload_t* payload) {
+    IotclMessageHandle msg = iotcl_telemetry_create();
+
     iotcl_telemetry_set_string(msg, "version", APP_VERSION);
-    iotcl_telemetry_set_number(msg, "ll_kitchen", light_levels[ROOM_IDX_KITCHEN]);
-    iotcl_telemetry_set_number(msg, "ll_bedroom", light_levels[ROOM_IDX_BEDROOM]);
-    iotcl_telemetry_set_number(msg, "ll_living_room", light_levels[ROOM_IDX_LIVING_ROOM]);
     iotcl_telemetry_set_string(msg, "event", payload->event);
     iotcl_telemetry_set_bool(msg, "has_event", payload->has_event);
 	iotcl_telemetry_set_bool(msg, "microphone_active", payload->is_mic_active);
-	
+
+#if defined(Smart_Lights_Demo)
+    setup_message_smart_lights(&msg, payload);
+#endif
+
     iotcl_mqtt_send_telemetry(msg, false);
     iotcl_telemetry_destroy(msg);
+
+
     return CY_RSLT_SUCCESS;
 }
 

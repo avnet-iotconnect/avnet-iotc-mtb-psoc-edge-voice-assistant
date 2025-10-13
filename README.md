@@ -1,4 +1,4 @@
-## Introduction
+## Avnet PSOC™ Edge DEEPCRAFT™ Voice Assistant
 
 This demo project is the integration of 
 Infineon's [PSOC™ Edge MCU: DEEPCRAFT™ Voice Assistant deployment](https://github.com/Infineon/mtb-example-psoc-edge-voice-assistant-deploy)
@@ -9,10 +9,15 @@ drive the room lights with voice commands.
 
 Please refer to the 
 [Infineon's original project's Operation section](https://github.com/Infineon/mtb-example-psoc-edge-voice-assistant-deploy?tab=readme-ov-file#operation)
-for more information on how to interact with the device using the voice prompts or other demos, 
+for more information on how to interact with the device using the voice prompts or the two other original Infoneon's demos, 
 in addition to the supported **Smart Lights Demo**.
 
 This project has a three project structure: CM33 secure, CM33 non-secure, and CM55 projects. All three projects are programmed to the external QSPI flash and executed in Execute in Place (XIP) mode. Extended boot launches the CM33 secure project from a fixed location in the external flash, which then configures the protection settings and launches the CM33 non-secure application. Additionally, CM33 non-secure application enables CM55 CPU and launches the CM55 application.
+
+The M55 processor performs the DEEPCRAFT™ model heavy lifting and reports the data via IPC to the M33 processor.
+The M33 Non-Secure application is a custom /IOTCONNECT application that is receiving the IPC messages, 
+processing the data and sending it to /IOTCONNECT. 
+This application can receive Cloud-To-Device commands as well and control one of the board LEDs or control the application flow.    
 
 > **Note:**
 > 1. The Audio and Voice middleware included in this example has a limited operation of about 15 and 30 minutes. For the unlimited license, contact Infineon support.
@@ -61,9 +66,13 @@ If you like to customize the wake word and the spoken commands, you need to have
 
 ## Running The Demo
 
-- After a few seconds, the device will connect to /IOTCONNECT, and begin sending telemetry packets similar to the example below:
+This section will focus on running the **Smart Lights Demo** option in the [common.mk](common.mk) with our custom /IOTCONNECT application. 
+If running the **LED Demo** or the **Cook Top Demo**, the application will only report the basic voice command events, 
+and will not track the light levels.
+
+- Afew seconds after executing the application, the device will connect to /IOTCONNECT, and begin sending telemetry packets similar to the example below:
 ```
->: {"d":[{"d":{"version":"1.0.0","ll_kitchen":0,"ll_bedroom":0,"ll_living_room":10,"event":"","has_event":false,"microphone_active":true}}]}
+>: {"d":[{"d":{"version":"S-1.1.0","ll_kitchen":0,"ll_bedroom":0,"ll_living_room":10,"event":"","has_event":false,"microphone_active":true}}]}
 ```
 
 - Speak the wake word "OK Infineon" and one of the commands from this

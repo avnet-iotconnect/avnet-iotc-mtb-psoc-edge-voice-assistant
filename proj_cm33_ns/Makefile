@@ -92,6 +92,8 @@ DEFINES+=HTTP_DO_NOT_USE_CUSTOM_CONFIG
 # for sntp
 DEFINES+=SNTP_SERVER_DNS
 
+# add project name LED_Demo etc to the defines so we can switch on it in code
+DEFINES+=$(DEEPCRAFT_PROJECT_NAME)
 
 SEARCH+=../shared/retarget_io/
 
