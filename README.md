@@ -32,7 +32,11 @@ This application can receive Cloud-To-Device commands as well and control one of
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
 
-- LLVM Embedded Toolchain for Arm&reg; v20.0.0 (preview-20.0.0-devdrop0 - v19.1.5 does NOT work with this project) (`LLVM_ARM`) - Default value of `TOOLCHAIN`
+- LLVM Embedded Toolchain for Arm&reg; [v20.0.0](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/tag/preview-20.0.0-devdrop0) (`LLVM_ARM`) - Default value of `TOOLCHAIN`
+
+> **Note:**
+> Ensure to use LLVM preview-20.0.0-devdrop0. v19.1.5 does NOT work with this project. 
+
 
 ## Supported kits (make variable 'TARGET')
 
