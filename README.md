@@ -64,7 +64,7 @@ but note the following exceptions:
 into a location (use a short path on Windows) like *C:/Infineon/Tools/LLVM-ET-Arm-20.0.0-Windows-x86_64*
  - Set an Environment Variable or set in common_app.mk with the path.
    - CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location] - use forward slashes as path separator. 
-   - For example: *C:/Infineon/Tools/LLVM-ET-Arm-19.1.5-Windows-x86_64*, where  *C:/llvm/LLVM-ET-Arm-19.1.5-Windows-x86_64* contains the *bin* directory form the extracted zip.
+   - For example: *C:/Infineon/Tools/LLVM-ET-Arm-20.0.0-Windows-x86_64*, where  *C:/llvm/LLVM-ET-Arm-20.0.0-Windows-x86_64* contains the *bin* directory form the extracted zip.
 
 If you like to customize the wake word and the spoken commands, you need to have access to the [DEEPCRAFT&trade; Voice-Assistant Cloud tool](https://deepcraft-voice-assistant.infineon.com/) and create your own wake word and spoken commands.
 
