@@ -62,7 +62,7 @@ but note the following exceptions:
  - When installing components with ***ModusToolbox&trade; Setup***, Install **DEEPCRAFT™ Audio Enhancement Tech Pack** version 1.0.0 as well.
  - Install the [LLVM compiler v20.0.0](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/tag/preview-20.0.0-devdrop0)
 into a location (use a short path on Windows) like *C:/Infineon/Tools/LLVM-ET-Arm-20.0.0-Windows-x86_64*
- - Set this Environment Variables or set in common_app.mk with the path. 
+ - Set an Environment Variable or set in common_app.mk with the path.
    - CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location] - use forward slashes as path separator. 
    - For example: *C:/Infineon/Tools/LLVM-ET-Arm-19.1.5-Windows-x86_64*, where  *C:/llvm/LLVM-ET-Arm-19.1.5-Windows-x86_64* contains the *bin* directory form the extracted zip.
 
