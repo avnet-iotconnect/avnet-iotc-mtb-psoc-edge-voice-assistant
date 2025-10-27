@@ -25,7 +25,7 @@ This application can receive Cloud-To-Device commands as well and control one of
 
 ## Requirements
 
-- [ModusToolbox&trade;](https://www.infineon.com/modustoolbox) v3.6 or later (tested with v3.6)
+- [ModusToolbox&trade;](https://www.infineon.com/modustoolbox) with MTB Tools v3.6 or later (tested with v3.6)
 - Board support package (BSP) minimum required version: 1.0.0
 - Programming language: C
 - Associated parts: All [PSOC&trade; Edge MCU](https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex/32-bit-psoc-edge-arm) parts
@@ -37,26 +37,16 @@ This application can receive Cloud-To-Device commands as well and control one of
 > **Note:**
 > Ensure to use LLVM preview-20.0.0-devdrop0. v19.1.5 does NOT work with this project. 
 
-
 ## Supported kits (make variable 'TARGET')
 
-- [PSOC&trade; Edge E84 AI Kit](https://www.newark.com/infineon/kitpse84aitobo1/ai-eval-kit-32bit-arm-cortex-m55f/dp/49AM4459) (`KIT_PSE84_AI`)
-- [PSOC&trade; Edge E84 Evaluation Kit](https://www.newark.com/infineon/kitpse84evaltobo1/eval-kit-32bit-arm-cortex-m55f/dp/49AM4460) (`KIT_PSE84_EVAL_EPC2`)
+- [PSOC&trade; Edge E84 AI Kit](https://www.infineon.com/KIT_PSE84_AI) (`KIT_PSE84_AI`) -
+[Purchase Link](https://www.newark.com/infineon/kitpse84aitobo1/ai-eval-kit-32bit-arm-cortex-m55f/dp/49AM4459)
+- [PSOC&trade; Edge E84 Evaluation Kit](https://www.infineon.com/KIT_PSE84_EVAL) (`KIT_PSE84_EVAL_EPC2`) -
+[Purchase Link](https://www.newark.com/infineon/kitpse84evaltobo1/eval-kit-32bit-arm-cortex-m55f/dp/49AM4460)
 
-## Hardware setup
+## Set Up The Project
 
-This example uses the board's default configuration. 
-See the kit user guide to ensure that the board is configured correctly.
-
-Ensure the following jumper and pin configuration on board.
-- BOOT SW must be in the HIGH/ON position
-- J20 and J21 must be in the tristate/not connected (NC) position
-
-> **Note:** This hardware setup is not required for KIT_PSE84_AI.
-
-## Setup The Project
-
-To setup the project, please refer to the 
+To set up the project, please refer to the 
 [/IOTCONNECT ModusToolbox&trade; PSOC Edge Developer Guide](DEVELOPER_GUIDE.md)
 but note the following exceptions:
  - When installing components with ***ModusToolbox&trade; Setup***, Install **DEEPCRAFT™ Audio Enhancement Tech Pack** version 1.0.0 as well.
