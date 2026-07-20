@@ -64,6 +64,8 @@ We suggest searching for "Avnet" first to reduce the list.
 - Click *Create* and close the Project Creator when the project is created successfully.
 - Open VS Code, and Select *File -> Open Workspace from File*, navigate to the location of the application that was just
 created, select the workspace file, and click *Open*.
+- If VS Code does not prompt you to *Trust this project*, click the *Restricted Mode* button in the bottom left of the status bar
+and trust the project.
 - Depending on your settings in VS Code and VS Code version, you may see a message about trusting the authors. 
 If so, click *Yes, I trust the authors*.
 
@@ -71,7 +73,7 @@ If so, click *Yes, I trust the authors*.
 In the *proj_cm33_ns* project directory modify **app_config.h** per your
 /IOTCONNECT device setup and **wifi_config.h** per your WiFi connection settings.
 - Before building, open the ModusToolbox Assistant in your IDE
-  - In the *Application* tab, click any *Apply Fix* buttons that may be present.  
+  - In the *Application* tab, click any *Fix Settings* or *Fix Tasks* buttons that may be present.  
   - Click on the *Settings* tab and select the **LLVM_ARM** toolchain from the dropdown.
 - To build the project, select *Terminal -> Run Task*. Then select *Build* from the dropdown.
 - To program the project onto the board, connect the board, 
