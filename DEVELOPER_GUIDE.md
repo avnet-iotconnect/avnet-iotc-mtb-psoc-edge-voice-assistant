@@ -43,10 +43,11 @@ Firmware logs will be available on that COM port.
   - ModusToolbox&trade; Tools Package 3.8.
   - ModusToolbox&trade; Edge Protect Security Suite 1.6.0.
   - ModusToolbox&trade; Programming Tools 1.6.1.
+  - ModusToolbox&trade; Audio SW Codecs Tech Pack 1.0.3.
   - Microsoft Visual Studio Code.
 - Download and install the [LLVM compiler release-19.1.5](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases)
-  - Set CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location] in your environment or explicitly in [common_app.mk](common_app.mk).
-  - For example: C:/llvm/LLVM-ET-Arm-19.1.5-Windows-x86_64
+  - Set *CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location]() in your environment or explicitly in [common_app.mk](common_app.mk).
+  - For example: *C:/llvm/LLVM-ET-Arm-19.1.5-Windows-x86_64*
 
 - Install and set up VS Code per [VS Code for ModusToolbox&trade; guide](https://www.infineon.com/assets/row/public/documents/30/44/infineon-visual-studio-code-user-guide-usermanual-en.pdf).
 At the time of writing this guide, it is only required to follow the first few sections
