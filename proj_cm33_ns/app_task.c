@@ -27,7 +27,7 @@
 // Cooktop_Demo      -- use the cooktop demo model
 
 
-#define APP_VERSION_BASE "01.01.00"
+#define APP_VERSION_BASE "02.00.00"
 
 #if defined(Smart_Lights_Demo)
 #define APP_VERSION ("S-" APP_VERSION_BASE)
