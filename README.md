@@ -25,17 +25,14 @@ This application can receive Cloud-To-Device commands as well and control one of
 
 ## Requirements
 
-- [ModusToolbox&trade;](https://www.infineon.com/modustoolbox) with MTB Tools v3.6 or later (tested with v3.6)
+- [ModusToolbox&trade;](https://www.infineon.com/modustoolbox) with MTB Tools v3.6 or later (tested with v3.8)
 - Board support package (BSP) minimum required version: 1.0.0
 - Programming language: C
 - Associated parts: All [PSOC&trade; Edge MCU](https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex/32-bit-psoc-edge-arm) parts
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
 
-- LLVM Embedded Toolchain for Arm&reg; [v20.0.0](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/tag/preview-20.0.0-devdrop0) (`LLVM_ARM`) - Default value of `TOOLCHAIN`
-
-> **Note:**
-> Ensure to use LLVM preview-20.0.0-devdrop0. v19.1.5 does NOT work with this project. 
+- LLVM Embedded Toolchain for Arm&reg; [release-19.1.5](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases) (`LLVM_ARM`) - Default value of `TOOLCHAIN`
 
 ## Supported kits (make variable 'TARGET')
 
@@ -46,15 +43,7 @@ This application can receive Cloud-To-Device commands as well and control one of
 
 ## Set Up The Project
 
-To set up the project, please refer to the 
-[/IOTCONNECT ModusToolbox&trade; PSOC Edge Developer Guide](DEVELOPER_GUIDE.md)
-but note the following exceptions:
- - When installing components with ***ModusToolbox&trade; Setup***, Install **DEEPCRAFT™ Audio Enhancement Tech Pack** version 1.0.0 as well.
- - Install the [LLVM compiler v20.0.0](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/tag/preview-20.0.0-devdrop0)
-into a location (use a short path on Windows) like *C:/Infineon/Tools/LLVM-ET-Arm-20.0.0-Windows-x86_64*
- - Set an Environment Variable or set in common_app.mk with the path.
-   - CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location] - use forward slashes as path separator. 
-   - For example: *C:/Infineon/Tools/LLVM-ET-Arm-20.0.0-Windows-x86_64*, where  *C:/llvm/LLVM-ET-Arm-20.0.0-Windows-x86_64* contains the *bin* directory form the extracted zip.
+To set up the project, please refer to the [/IOTCONNECT ModusToolbox&trade; PSOC Edge Developer Guide](DEVELOPER_GUIDE.md).
 
 If you like to customize the wake word and the spoken commands, you need to have access to the [DEEPCRAFT&trade; Voice-Assistant Cloud tool](https://deepcraft-voice-assistant.infineon.com/) and create your own wake word and spoken commands.
 

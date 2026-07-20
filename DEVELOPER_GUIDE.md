@@ -40,11 +40,13 @@ Firmware logs will be available on that COM port.
 > if you are contributing to this project.
 
 - Download [ModusToolbox&trade; software](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/). Install the ***ModusToolbox&trade; Setup*** software. The software may require you to log into your Infineon account. In ***ModusToolbox&trade; Setup*** software, download & install the items below:
-  - ModusToolbox&trade; Tools Package 3.6.
+  - ModusToolbox&trade; Tools Package 3.8.
   - ModusToolbox&trade; Edge Protect Security Suite 1.6.0.
-  - ModusToolbox&trade; Programming Tools 1.6.0.
-  - Arm GCC Toolchain (GCC) 14.2.1.
+  - ModusToolbox&trade; Programming Tools 1.6.1.
   - Microsoft Visual Studio Code.
+- Download and install the [LLVM compiler release-19.1.5](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases)
+  - Set CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location] in your environment or explicitly in [common_app.mk](common_app.mk).
+  - For example: C:/llvm/LLVM-ET-Arm-19.1.5-Windows-x86_64
 
 - Install and set up VS Code per [VS Code for ModusToolbox&trade; guide](https://www.infineon.com/assets/row/public/documents/30/44/infineon-visual-studio-code-user-guide-usermanual-en.pdf).
 At the time of writing this guide, it is only required to follow the first few sections
@@ -67,7 +69,9 @@ If so, click *Yes, I trust the authors*.
 - Once the [Cloud Account Setup](#cloud-account-setup) below is complete,
 In the *proj_cm33_ns* project directory modify **app_config.h** per your
 /IOTCONNECT device setup and **wifi_config.h** per your WiFi connection settings.
-
+- Before building, open the ModusToolbox Assistant in your IDE
+  - In the *Application* tab, click any *Apply Fix* buttons that may be present.  
+  - Click on the *Settings* tab and select the **LLVM_ARM** toolchain from the dropdown.
 - To build the project, select *Terminal -> Run Task*. Then select *Build* from the dropdown.
 - To program the project onto the board, connect the board, 
 select *Terminal -> Run Task*. Then select *Program* from the dropdown.
@@ -123,16 +127,15 @@ An /IOTCONNECT *Device Template* will need to be created or imported.
 * Ensure "Auto-generated" is selected under *Device certificate*.
 * Click **Save & View**.
 * In the *Info* panel, click the *Connection Info* hyperink on top right and 
-download the certificate by clicking the download icon on the top right
-![download-cert.png](media/download-cert.png).
+download the certificate by clicking the download certificate icon on the top right.
 * Provide values for DUID, CPID and ENV from the above steps into the **proj_cm33_ns/app_config.h** file.
 * Set your IOTCONNECT_CONNECTION_TYPE in the same file, per comments.
 * Unzip the previously downloaded certificates zip into a directory.
-Open the device certificate and private key files in an editor.
-Use the VS Code Copilot AI Agent to set up the certificate and private key for you with the following prompt:
+* Either follow the manual editing instructions in app_config.h to provide the certificate or
+use your favorite AI Agent to set up the certificate and private key for you with the following prompt:
 > ```
 > Set IOTCONNECT_DEVICE_CERT and IOTCONNECT_DEVICE_KEY in app_config.h.
-> Use the instructions in the file and these PEM contents:
+> Use the instructions in the app_config.h file and these PEM contents:
 > (copy and paste the cert and private key as text here)
 > ```
 
