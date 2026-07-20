@@ -37,7 +37,7 @@
 * Header Files
 *******************************************************************************/
 
-#inlcude <string.h>
+#include <string.h>
 
 #include "va_task.h"
 #include "led_pwm.h"

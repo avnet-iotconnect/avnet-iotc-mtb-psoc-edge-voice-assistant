@@ -29,6 +29,7 @@ assetlocks.json
 
 # ModusToolbox Configurator generated code and lock file
 GeneratedSource/
+imports/
 *.lock
 .mtbqueryapi
 
