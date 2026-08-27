@@ -44,6 +44,7 @@ Firmware logs will be available on that COM port.
   - ModusToolbox&trade; Edge Protect Security Suite 1.6.0.
   - ModusToolbox&trade; Programming Tools 1.6.1.
   - ModusToolbox&trade; Audio SW Codecs Tech Pack 1.0.3.
+  - DEEPCRAFT&trade; Audio Enhancement Tech Pack 1.2.0.
   - Microsoft Visual Studio Code.
 - Download and install the [LLVM compiler release-19.1.5](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases)
   - Set *CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location]() in your environment or explicitly in [common_app.mk](common_app.mk).
