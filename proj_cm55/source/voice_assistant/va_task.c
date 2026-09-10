@@ -57,7 +57,6 @@
 #endif /* ENABLE_VOICE_ID */
 #include "app_logger.h"
 
-
 /*****************************************************************************
  * Macros
  *****************************************************************************/
@@ -250,7 +249,7 @@ static void print_voice_assistant_status(cy_rslt_t result, va_event_t event, va_
             payload->has_event = true;
             payload->is_mic_active = true;
 
-#ifdef ENABLE_VOICE_ID 
+#ifdef ENABLE_VOICE_ID
             if (get_enrolled_users()!=0){           
                 voice_id_mode=IFX_VOICE_ID_VERIFY;
                 app_log_print("Say a command \r\nVoice ID verification in progress ...\n\r");

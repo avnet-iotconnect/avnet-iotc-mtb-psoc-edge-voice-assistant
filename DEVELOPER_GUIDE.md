@@ -40,11 +40,11 @@ Firmware logs will be available on that COM port.
 > if you are contributing to this project.
 
 - Download [ModusToolbox&trade; software](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/). Install the ***ModusToolbox&trade; Setup*** software. The software may require you to log into your Infineon account. In ***ModusToolbox&trade; Setup*** software, download & install the items below:
-  - ModusToolbox&trade; Tools Package 3.8.
-  - ModusToolbox&trade; Edge Protect Security Suite 1.6.0.
-  - ModusToolbox&trade; Programming Tools 1.6.1.
+  - ModusToolbox&trade; Tools Package 3.9. (3.7 and later should work).
+  - ModusToolbox&trade; Edge Protect Security Suite 2.2.0.
+  - ModusToolbox&trade; Programming Tools 1.9.0.
   - ModusToolbox&trade; Audio SW Codecs Tech Pack 1.0.3.
-  - DEEPCRAFT&trade; Audio Enhancement Tech Pack 1.2.0.
+  - DEEPCRAFT&trade; Audio Enhancement Tech Pack 1.3.0.
   - Microsoft Visual Studio Code.
 - Download and install the [LLVM compiler release-19.1.5](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases)
   - Set *CY_COMPILER_LLVM_ARM_DIR=[path to LLVM compiler location]() in your environment or explicitly in [common_app.mk](common_app.mk).
@@ -61,7 +61,8 @@ It is preferred to use a short path due to Windows OS file path limits.
 - Ensure that the Target IDE is *Microsoft Visual Studio Code*.
 - Checkmark this repo's application by browsing Template Applications or searching for this application name. 
 We suggest searching for "Avnet" first to reduce the list.
-- It is recommended to override the New Application Name value to a shorter name.
+- On Windows, it is recommended to override the New Application Name value to a shorter name 
+as well as using a short path in Project Creator. Otherwise, the build may fail due to Windows path length limitations. 
 - Click *Create* and close the Project Creator when the project is created successfully.
 - Open VS Code, and Select *File -> Open Workspace from File*, navigate to the location of the application that was just
 created, select the workspace file, and click *Open*.
@@ -70,19 +71,20 @@ and trust the project.
 - Depending on your settings in VS Code and VS Code version, you may see a message about trusting the authors. 
 If so, click *Yes, I trust the authors*.
 
-- Once the [Cloud Account Setup](#cloud-account-setup) below is complete,
-In the *proj_cm33_ns* project directory modify **app_config.h** per your
-/IOTCONNECT device setup and **wifi_config.h** per your WiFi connection settings.
-- Before building, open the ModusToolbox Assistant in your IDE
-  - In the *Application* tab, click any *Fix Settings* or *Fix Tasks* buttons that may be present.  
-  - Click on the *Settings* tab and select the **LLVM_ARM** toolchain from the dropdown.
-- To build the project, select *Terminal -> Run Task*. Then select *Build* from the dropdown.
+- Build the project, select *Terminal -> Run Task*. Then select *Build* from the dropdown.
 - To program the project onto the board, connect the board, 
 select *Terminal -> Run Task*. Then select *Program* from the dropdown.
 - If you wish to debug the project, select *Run > Start Debugging* instead.
+- (Optional) While we recommend using the runtime device configuration, please note that the configuration
+can be hard-coded in the app_config.h and wifi_config.h files. The device can be created first in /IOTCONNECCT and the 
+certificate and private key can be downloaded and set in the app_config.h.
+- Open your terminal emulator and monitor the device startup messages. Note the following similar to this one:
 
+```
+Generated device unique ID (DUID) is: psoc-edge-va-11012233
+```
 
-## Cloud Account Setup
+Record this DUID to use it in the later steps. 
 
 ### Create an /IOTCONNECT Account
 An /IOTCONNECT account with an AWS backend is required.  If you need to create an account, a free trial subscription is available.
@@ -125,22 +127,57 @@ An /IOTCONNECT *Device Template* will need to be created or imported.
 ### /IOTCONNECT Device Creation and Setup
 
 * Create a new device in the /IOTCONNECT portal. (Follow the [Create a New Device](https://github.com/avnet-iotconnect/avnet-iotconnect.github.io/blob/main/documentation/iotconnect/create_new_device.md) guide for a detailed walkthrough).
-* Choose a name for your device and enter it into the *Unique ID* field (also called Device Unique ID - DUID in this guide).
+* Enter the *DUID* displayed on the device terminal into the *Unique ID* field (also called Device Unique ID - DUID in this guide).
 * Enter the same DUID or descriptive name of your choosing as *Display Name* to help identify your device.
 * Select the template from the dropdown box that was just imported.
-* Ensure "Auto-generated" is selected under *Device certificate*.
-* Click **Save & View**.
-* In the *Info* panel, click the *Connection Info* hyperink on top right and 
-download the certificate by clicking the download certificate icon on the top right.
-* Provide values for DUID, CPID and ENV from the above steps into the **proj_cm33_ns/app_config.h** file.
-* Set your IOTCONNECT_CONNECTION_TYPE in the same file, per comments.
-* Unzip the previously downloaded certificates zip into a directory.
-* Either follow the manual editing instructions in app_config.h to provide the certificate or
-use your favorite AI Agent to set up the certificate and private key for you with the following prompt:
-> ```
-> Set IOTCONNECT_DEVICE_CERT and IOTCONNECT_DEVICE_KEY in app_config.h.
-> Use the instructions in the app_config.h file and these PEM contents:
-> (copy and paste the cert and private key as text here)
-> ```
+* Ensure "Use my certificate" is selected under *Device certificate*.
 
-At this point, the application is set up with /IOTCONNECT credentials.
+Return to the device terminal and enter your account and Wi-Fi credentials, similar to this:
+```
+Please enter your device configuration
+Platform (aws/az): 
+>Platform: aws
+CPID: 
+>mycpid
+Environment: 
+>myenv
+WiFi SSID: 
+>myssid
+WiFi Password: 
+>mypass
+```
+
+> [!NOTE]
+> Enabling **local echo** in your terminal settings
+> may help when entering the information but may conflict with the output as well,
+> depending on which terminal emulator is used.
+
+You should see the device write the configured values and reset. On subsequent boot the device configration and
+the certificate will be displayed:
+```
+Current Settings:
+Platform: AWS
+DUID: psoc-edge-va-11012233
+CPID: mycpid
+ENV: myenv
+WiFi SSID: myssid
+Device certificate:
+-----BEGIN CERTIFICATE-----
+MIIBfzCCASagAwIBAgIIftSAAzQzATMwCgYIKoZIzj0EAwIwOTEaMBgGA1UEAwwR
+SW9UQ29ubmVjdERldkNlcnQxDjAMBgNVBAoMBUF2bmV0MQswCQYDVQQGEwJVUzAg
+Fw0yNDAxMDEwM                                   MBgGA1UEAwwRSW9U
+Q29ubmVjdERld                                   VQQGEwJVUzBZMBMG
+ByqGSM49AgEGC         SAMPLE CERTIFICAT         eklK5tmV7N95xrGm
+who39wX16VoYa                                   3u2jFjAUMBIGA1Ud
+EwEB/wQIMAYBA                                   GVNVm0q+ztJmUi6C
+jx8ZHQgzNRiywiDxV2LEgGgCIFJuyFsMp3VfOqp0QoRopL5S9XTaPwMDK16ouffu
+UQRV
+-----END CERTIFICATE-----
+```
+* This information will always be displayed on boot-up. You will also have an option to enter "y" 
+at the *Do you wish to configure the device?* prompt to re-configure the values.
+* If you wish to re-generate the certificate, issue *Terminal -> Run Task -> Erase* and then program the firmware again.
+* Return to the /IOTCCONNECT browser window and copy the device certificate including the BEGIN and END lines.
+* Click **Save & View**.
+
+* At this point, the application is set up with /IOTCONNECT credentials and reseting the board should connect it to /IOTCONNECT.
